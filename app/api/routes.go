@@ -21,6 +21,7 @@ func writeJSON(w http.ResponseWriter, v any, status ...int) {
 
 func (a *API) Routes() http.Handler {
 	r := chi.NewRouter()
+	r.Use(corsMiddleware)
 	r.Get("/search", a.search)
 	r.Get("/download", a.download)
 	r.Post("/reindex", a.reindex)
@@ -75,4 +76,19 @@ func (a *API) reindex(w http.ResponseWriter, r *http.Request) {
 		count++
 	}
 	writeJSON(w, map[string]int{"indexed": count})
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
