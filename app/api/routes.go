@@ -1,14 +1,12 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/minio/minio-go/v7"
 )
 
 func writeJSON(w http.ResponseWriter, v any, status ...int) {
@@ -24,7 +22,6 @@ func (a *API) Routes() http.Handler {
 	r.Use(corsMiddleware)
 	r.Get("/search", a.search)
 	r.Get("/download", a.download)
-	r.Post("/reindex", a.reindex)
 	return r
 }
 
@@ -60,22 +57,6 @@ func (a *API) download(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, u.String(), http.StatusFound)
-}
-
-// déclenche un backfill (simple)
-func (a *API) reindex(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-	ch := a.Minio.ListObjects(ctx, a.Bucket, minio.ListObjectsOptions{Recursive: true})
-	count := 0
-	for obj := range ch {
-		if obj.Err != nil {
-			continue
-		}
-
-		_ = a.Index.IndexObject(ctx, a.Minio, a.Bucket, obj.Key)
-		count++
-	}
-	writeJSON(w, map[string]int{"indexed": count})
 }
 
 func corsMiddleware(next http.Handler) http.Handler {

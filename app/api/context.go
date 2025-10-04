@@ -1,8 +1,10 @@
 package api
 
 import (
+	"context"
 	"log"
 	"s3search/app/index"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -25,5 +27,8 @@ func New(endpoint string, access string, secret string, bucket string, indexPath
 
 	appIndex := index.New(indexPath)
 
-	return &API{Minio: cl, Index: appIndex, Bucket: bucket}
+	api := &API{Minio: cl, Index: appIndex, Bucket: bucket}
+	api.Index.StartBackgroundIndexing(context.Background(), 5*time.Minute, api.Minio, api.Bucket)
+
+	return api
 }
