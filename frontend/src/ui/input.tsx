@@ -1,23 +1,40 @@
 import { Search, SendHorizonal } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type InputProps = {
-  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleSubmit: (search: string) => void;
+  initialValue?: string;
+  placeholder?: string;
+  autoFocus?: boolean;
 };
 
-const Input = ({ handleSubmit }: InputProps) => {
-  const [search, setSearch] = useState<string>("");
+const Input = ({
+  handleSubmit,
+  initialValue = "",
+  placeholder = "",
+  autoFocus = false,
+}: InputProps) => {
+  const [search, setSearch] = useState<string>(initialValue);
+
+  useEffect(() => {
+    setSearch(initialValue);
+  }, [initialValue]);
+
   return (
     <form
-      onSubmit={handleSubmit}
-      className="flex gap-2 flex-rows items-center rounded-full border border-gray-300 p-2.5 shadow-sm"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit(search);
+      }}
+      className="flex gap-2 flex-rows items-center rounded-full border border-gray-300 p-2.5 shadow-sm bg-white"
     >
       <Search className="w-9" />
       <input
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        placeholder="Rechercher..."
+        placeholder={placeholder}
+        autoFocus={autoFocus}
         className="focus:outline-none flex-1 min-w-96"
       />
       <button className="cursor-pointer bg-gray-300 text-gray-700 rounded-full p-2 hover:bg-gray-200 size-9 flex items-center justify-center">
