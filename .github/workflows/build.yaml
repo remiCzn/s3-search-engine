@@ -1,0 +1,92 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  BUILD_TARGET: prod
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Make build script executable
+        run: chmod +x build.sh
+
+      - name: Checkout transcrypt
+        uses: actions/checkout@v4
+        with:
+          repository: elasticdog/transcrypt
+          path: transcrypt
+
+      - name: Initialise transcrypt
+        run: ./transcrypt/transcrypt -c aes-256-cbc -p '${{ secrets.TRANSCRYPT_PASSWORD }}' --yes
+
+      - name: Build application
+        run: ./build.sh "$BUILD_TARGET"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          if-no-files-found: error
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Deploy artifacts over SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: dist/*
+          target: ${{ secrets.DEPLOY_PATH }}
+          overwrite: true
+
+      - name: Reload PM2 process
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            export PATH=$PATH:/root/.local/share/pnpm
+            cd ${{ secrets.DEPLOY_PATH }}
+            pm2 startOrReload pm2.json
+            pm2 save

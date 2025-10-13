@@ -11,6 +11,7 @@ services:
       MINIO_BROWSER_REDIRECT_URL: https://s3-front.remic.fr
     ports: [ "9000:9000", "9001:9001" ]
     volumes: [ "minio:/data" ]
+    mem_limit: 384m
 
 volumes:
   minio:

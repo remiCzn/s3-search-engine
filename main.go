@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"s3search/app/api"
@@ -17,6 +18,20 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	staticDir := os.Getenv("STATIC_DIR")
+	if staticDir == "" {
+		if exe, err := os.Executable(); err == nil {
+			exeDir := filepath.Dir(exe)
+			candidate := filepath.Join(exeDir, "static")
+			if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+				staticDir = candidate
+			}
+		}
+	}
+	if staticDir == "" {
+		staticDir = filepath.Join("frontend", "dist")
+	}
+
 	d := api.New(
 		os.Getenv("MINIO_ENDPOINT"),
 		os.Getenv("MINIO_ACCESS_KEY"),
@@ -24,9 +39,9 @@ func main() {
 		os.Getenv("MINIO_BUCKET"),
 		os.Getenv("INDEX_PATH"),
 		os.Getenv("PORT"),
+		staticDir,
 	)
 
-	api := &api.API{Index: d.Index, Minio: d.Minio, Bucket: d.Bucket}
 	log.Println("listening on :", d.Port)
-	log.Fatal(http.ListenAndServe("localhost:"+strconv.Itoa(d.Port), api.Routes()))
+	log.Fatal(http.ListenAndServe("localhost:"+strconv.Itoa(d.Port), d.Routes()))
 }

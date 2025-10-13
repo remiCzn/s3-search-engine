@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "name": "s3search",
+      "script": "./s3search",
+      "cwd": ".",
+      "autorestart": true,
+      "watch": false
+    }
+  ]
+}

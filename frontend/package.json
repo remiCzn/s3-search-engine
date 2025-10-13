@@ -26,5 +26,10 @@
     "@vitejs/plugin-react-swc": "^4.1.0",
     "typescript": "^5.9.3",
     "vite": "^7.1.9"
-  }
+  },
+  "volta": {
+    "yarn": "1.22.22",
+    "node": "24.10.0"
+  },
+  "packageManager": "yarn@1.22.22"
 }
