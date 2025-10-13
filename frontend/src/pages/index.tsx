@@ -21,6 +21,9 @@ export default function Index() {
         </p>
         <Input handleSubmit={handleSubmit} />
       </div>
+      <div className="mt-auto">
+        <a href="/about">about</a>
+      </div>
     </main>
   );
 }

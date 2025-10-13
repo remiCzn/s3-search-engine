@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"s3search/app/index"
+	"strconv"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -14,9 +15,10 @@ type API struct {
 	Minio  *minio.Client
 	Index  *index.Index
 	Bucket string
+	Port   int
 }
 
-func New(endpoint string, access string, secret string, bucket string, indexPath string) *API {
+func New(endpoint string, access string, secret string, bucket string, indexPath string, port string) *API {
 	cl, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(access, secret, ""),
 		Secure: true,
@@ -27,7 +29,12 @@ func New(endpoint string, access string, secret string, bucket string, indexPath
 
 	appIndex := index.New(indexPath)
 
-	api := &API{Minio: cl, Index: appIndex, Bucket: bucket}
+	portInt, err := strconv.Atoi(port)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	api := &API{Minio: cl, Index: appIndex, Bucket: bucket, Port: portInt}
 	api.Index.StartBackgroundIndexing(context.Background(), 5*time.Minute, api.Minio, api.Bucket)
 
 	return api

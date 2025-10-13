@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"s3search/app/api"
 
@@ -22,9 +23,10 @@ func main() {
 		os.Getenv("MINIO_SECRET_KEY"),
 		os.Getenv("MINIO_BUCKET"),
 		os.Getenv("INDEX_PATH"),
+		os.Getenv("PORT"),
 	)
 
 	api := &api.API{Index: d.Index, Minio: d.Minio, Bucket: d.Bucket}
-	log.Println("listening on :8080")
-	log.Fatal(http.ListenAndServe("localhost:8080", api.Routes()))
+	log.Println("listening on :", d.Port)
+	log.Fatal(http.ListenAndServe("localhost:"+strconv.Itoa(d.Port), api.Routes()))
 }
