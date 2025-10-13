@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 
 	"s3search/app/api"
@@ -13,6 +14,7 @@ import (
 )
 
 func main() {
+	runtime.GOMAXPROCS(1)
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")

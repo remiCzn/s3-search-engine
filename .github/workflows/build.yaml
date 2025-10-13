@@ -67,6 +67,19 @@ jobs:
           name: dist
           path: dist
 
+      - name: Stop PM2 process
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            export PATH=$PATH:/root/.local/share/pnpm
+            cd ${{ secrets.DEPLOY_PATH }}/dist
+            pm2 stop pm2.json
+
       - name: Deploy artifacts over SSH
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -87,6 +100,7 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             export PATH=$PATH:/root/.local/share/pnpm
-            cd ${{ secrets.DEPLOY_PATH }}
+            cd ${{ secrets.DEPLOY_PATH }}/dist
+            sudo chmod +x ./s3search
             pm2 startOrReload pm2.json
             pm2 save
