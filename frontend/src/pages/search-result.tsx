@@ -63,7 +63,7 @@ const SearchResult = () => {
   return (
     <main className="min-h-screen bg-gray-100">
       <header className="bg-white border-b border-gray-200">
-        <div className="container mx-auto flex flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:gap-8">
+        <div className="container mx-auto flex flex-col gap-4 px-4 py-5 sm:px-6 md:flex-row md:items-center md:gap-8">
           <Link
             to={"/"}
             className="text-2xl transition hover:text-gray-800 cursor-pointer"
@@ -81,7 +81,7 @@ const SearchResult = () => {
         </div>
       </header>
 
-      <section className="container mx-auto px-6 py-8">
+      <section className="container mx-auto px-4 py-8 sm:px-6">
         <div className="mb-6 text-sm text-gray-600">
           {isLoading && <span>Recherche des résultats...</span>}
           {!isLoading && (

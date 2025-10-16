@@ -30,7 +30,7 @@ const Pagination = ({ currentPage, totalPages, onChange }: PaginationProps) => {
 
   return (
     <nav className="mt-10 flex flex-col items-center gap-3">
-      <div className="flex items-center gap-1 text-sm text-gray-600">
+      <div className="flex flex-wrap items-center justify-center gap-1 text-sm text-gray-600">
         <PaginationButton
           onClick={() => onChange(Math.max(currentPage - 1, 1))}
           disabled={currentPage === 1}
@@ -81,7 +81,7 @@ const PaginationButton = ({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="rounded-full px-4 py-2 font-medium transition disabled:cursor-not-allowed disabled:text-gray-300 hover:bg-gray-200"
+      className="flex-shrink-0 rounded-full px-4 py-2 font-medium transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:text-gray-300"
     >
       {children}
     </button>
